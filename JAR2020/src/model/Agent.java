@@ -2,7 +2,7 @@ package model;
 
 public class Agent implements AgentInterface{
 	
-	private AID id;
+	protected AID id;
 	
 	public Agent() {
 		

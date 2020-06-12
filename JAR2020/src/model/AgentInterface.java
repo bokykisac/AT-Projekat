@@ -1,5 +1,6 @@
 package model;
 
+
 public interface AgentInterface {
 	
 	void init(AID aid);
