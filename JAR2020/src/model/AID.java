@@ -18,6 +18,13 @@ public class AID implements Serializable{
 		this.host = host;
 		this.type = type;
 	}
+	
+	public AID(String url) {
+		String[] s = url.split("\\$");
+		this.name = s[0];
+		this.host = new AgentCenter(s[2], s[1]);
+		this.type = new AgentType(s[3], s[4]);
+	}
 
 	public String getName() {
 		return name;

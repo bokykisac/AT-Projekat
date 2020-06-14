@@ -18,6 +18,7 @@ import model.AID;
 import model.AgentCenter;
 import model.AgentType;
 import node.NodeManager;
+import node.NodeManagerLocal;
 import ws.WSEndPoint;
 
 
@@ -33,7 +34,7 @@ public class AgentBean {
 	AgentManager am;
 	
 	@EJB
-	NodeManager nm;
+	NodeManagerLocal nm;
 		
 	@GET
 	@Path("/test")

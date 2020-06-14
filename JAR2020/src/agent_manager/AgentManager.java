@@ -7,11 +7,13 @@ import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Singleton;
 
+import model.ACLMessage;
 import model.AID;
 import model.Agent;
 import model.AgentCenter;
 import model.AgentType;
 import node.NodeManager;
+import node.NodeManagerLocal;
 
 @Singleton
 public class AgentManager {
@@ -19,7 +21,7 @@ public class AgentManager {
 	private HashMap<AgentCenter, ArrayList<AgentType>> agentTypes;
 	
 	@EJB
-	NodeManager nm;
+	NodeManagerLocal nm;
 	
 	
 	public void startInit(AgentCenter center) {
@@ -31,22 +33,12 @@ public class AgentManager {
 		agentTypes = new HashMap<>();
 		
 		AgentType at1 = new AgentType("PingAgent", "agents");
+		AgentType at2 = new AgentType("PongAgent", "agents");
 		ArrayList<AgentType> tmp = new ArrayList<AgentType>();
 		tmp.add(at1);
+		tmp.add(at2);
 		agentTypes.put(center, tmp);
 
-//		final File basePackage = new File(
-//				AgentManagerLocal.class.getProtectionDomain().getCodeSource().getLocation().getPath() + File.separator
-//						+ "agent");
-
-//		ArrayList<AgentType> agentTypesList = processFile(basePackage);
-
-//		agentTypes.put(center, agentTypesList);
-		
-//		for (AgentType at: agentTypesList) {
-//			AID a = new AID(at.getName()+ "1", center, at);
-//			startAgent(a);
-//		}
 	}
 	
 	public List<AID> getRunningAgents() {
@@ -69,7 +61,6 @@ public class AgentManager {
 		}
 
 		try {
-			System.out.println(agent.getType().toString() + "\n\n\n");
 			Object obj = Class.forName(agent.getType().toString()).newInstance();
 			if (obj instanceof Agent) {
 				((Agent) obj).setId(agent);
@@ -87,14 +78,20 @@ public class AgentManager {
 	
 	private AID containsAgent(AID key) {
 		for (AID tmp : runningAgents.keySet()) {
+			System.out.println("Agenti trce: ");
+			System.out.println(tmp.getName() + " | " + tmp.getHost().getAddress() + " | " + tmp.getHost().getAlias() + " | " + tmp.getType().getName() + " | " +  tmp.getType().getModule());
+			System.out.println("Uporedjuje: ");
+			System.out.println(key.getName() + " | " + key.getHost().getAddress() + " | " + key.getHost().getAlias() + " | " + key.getType().getName() + " | " +  key.getType().getModule());
+
 			if (tmp.getHost().getAlias().equals(key.getHost().getAlias())
 					&& tmp.getHost().getAddress().equals(key.getHost().getAddress())
 					&& tmp.getName().equals(key.getName()) && tmp.getType().getName().equals(key.getType().getName())
-					&& tmp.getType().getModule().equals(key.getType().getModule()))
+					&& tmp.getType().getModule().equals(key.getType().getModule())) {
 				System.out.println("AGENT VEC POSTOJI");
 				return tmp;
+			}	
 		}
-		System.out.println("NE POSTOJI TAKAV AGENT, DODAJE SE");
+		System.out.println("NE POSTOJI TAKAV AGENT");
 		return null;
 	}
 	
@@ -124,6 +121,18 @@ public class AgentManager {
 			runningAgents.remove(a);
 		} else {
 			System.out.println("No such agent!");
+		}
+	}
+	
+	public boolean msgToAgent(AID agent, ACLMessage msg) {
+		AID temp = containsAgent(agent);
+		System.out.println("Nasao je agenta, salje poruku");
+		Agent receiver = runningAgents.get(temp);
+		if (receiver != null) {
+			receiver.handleMessage(msg);
+			return true;
+		} else {
+			return false;
 		}
 	}
 }

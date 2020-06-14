@@ -14,7 +14,7 @@ import model.AgentCenter;
 
 @Startup
 @Singleton
-public class NodeManager {
+public class NodeManager implements NodeManagerLocal{
 
 	private List<AgentCenter> nodes;
 	private AgentCenter masterNode;
@@ -58,8 +58,16 @@ public class NodeManager {
 		}
 	}
 	
+	@Override
 	public AgentCenter getThisNode() {
+		System.out.println("GET THIS NODE");
+		System.out.println(this.thisNode);
 		return thisNode;
+	}
+	
+	@Override
+	public void testiram() {
+		System.out.println(thisNode);
 	}
 
 	

@@ -1,7 +1,6 @@
+/META-INF/
+/agent_manager/
+/agents/
 /beans/
 /model/
-/dto/
-/service/
-/agents/
-/agent_manager/
 /node/
