@@ -20,7 +20,6 @@ import javax.websocket.server.ServerEndpoint;
 
 import com.google.gson.Gson;
 
-import dto.MessageDTO;
 import model.SocketMessage;
 
 @Singleton
@@ -39,28 +38,25 @@ public class WSEndPoint {
 		}
 	}
 	
-	 @OnMessage
-	    public void echoTextMessage(String jsonMessageDTO) {
-	        try {
-	        	MessageDTO messageDTO = new Gson().fromJson(jsonMessageDTO, MessageDTO.class);
-	        	List<Session> sessionsOfUser = userSessions.get(messageDTO.getRecieverUsername());
-	        	
-	        	//If active user is not active anymore, that is, if user doesn't have active sessions left
-	        	if (sessionsOfUser != null) {
-		        	SocketMessage socketMessage = new SocketMessage();
-		        	socketMessage.setType("message");
-		        	socketMessage.setMessage(jsonMessageDTO);
-		        	String jsonMessage = new Gson().toJson(socketMessage);
-		        	
-		        	for (Session s: sessionsOfUser) {
-		        		s.getBasicRemote().sendText(jsonMessage);
-		        	}
-	        	}
-	        	
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
-	    }
+	@OnMessage
+	public void echoTextMessage(Session session, String msg, boolean last) {
+		try {
+			if(session.isOpen()) {
+				for(Session s : sessions) {
+					if(!s.getId().equals(session.getId())) {
+						s.getBasicRemote().sendText(msg, last);
+					}
+				}
+			}
+		}catch (IOException e) {
+			try {
+				session.close();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+
+ 	}
 	
 	@OnClose
 	public void close(Session session) {

@@ -32,5 +32,10 @@ public class AgentType implements Serializable{
 	public void setModule(String module) {
 		this.module = module;
 	}
+	
+	@Override
+	public String toString() {
+		return module + "." + name;
+	}
 
 }

@@ -21,18 +21,15 @@ public class MessageBean {
 	
 	@EJB
 	WSEndPoint ws;
-	
-	@EJB
-	Db db;
-	
-	@POST
-	public Response sendMessage(ACLMessage message) {
-		return Response.status(200).entity("Message send").build();
-	}
-	
-	@GET
-	public Collection<ACLMessage> getMessages() {
-		return db.getMessages().values();
-	}
+		
+//	@POST
+//	public Response sendMessage(ACLMessage message) {
+//		return Response.status(200).entity("Message send").build();
+//	}
+//	
+//	@GET
+//	public Collection<ACLMessage> getMessages() {
+//		return db.getMessages().values();
+//	}
 
 }

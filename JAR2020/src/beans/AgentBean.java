@@ -1,5 +1,4 @@
 package beans;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.EJB;
@@ -14,9 +13,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import agent_manager.AgentManager;
 import model.AID;
-import model.Agent;
+import model.AgentCenter;
 import model.AgentType;
+import node.NodeManager;
 import ws.WSEndPoint;
 
 
@@ -29,69 +30,92 @@ public class AgentBean {
 	WSEndPoint ws;
 	
 	@EJB
-	AgentCenterManagerBean acmb;
+	AgentManager am;
 	
+	@EJB
+	NodeManager nm;
+		
 	@GET
 	@Path("/test")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String test() {
+		System.out.println("--------------------");
+			for(AgentType at : am.getAgentTypes()) {
+				System.out.println(at.getName());
+			}
+		System.out.println("--------------------");
 		return "OK";
 	}
 	
 	@GET
 	@Path("/classes")
-	public List<AgentType> getAgentsTypes() {
-		
-		acmb.getAgentsTypes().put("AGENT1", new AgentType("agent-name", "agent-module"));
-		
-		List<AgentType> agentTypes = new ArrayList<>();
-		for(AgentType agent : acmb.getAgentsTypes().values()) {
-			System.out.println(agent.getName() + " added.");
-			agentTypes.add(agent);
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getAgentsTypes() {
+		List<AgentType> agentTypes = am.getAgentTypes();
+		if(agentTypes.isEmpty()) {
+			return Response.status(400).entity("No agent types found.").build();
 		}
-		return agentTypes;
+		return Response.status(200).entity(am.getAgentTypes()).build();
 	}
 	
 	@GET
 	@Path("/running")
-	public List<Agent> getRunningAgents() {
-				
-		List<Agent> agents = new ArrayList<>();
-		for(Agent agent : acmb.getRunningAgents().values()) {
-			agents.add(agent);
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getRunningAgents() {
+		List<AID> runningAgents = am.getRunningAgents();
+		if(runningAgents.isEmpty()) {
+			return Response.status(400).entity("No agents running.").build();
 		}
-		return agents;
+		return Response.status(200).entity(am.getRunningAgents()).build();	
 	}
+	
 	
 	@PUT
 	@Path("/running/{type}/{name}")
-	public Agent startAgent(@PathParam("type") String type, @PathParam("name") String name) {
-		for(String key : acmb.getRunningAgents().keySet()) {
-			if(name.equals(key)) {
-				return null;
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response startAgent(@PathParam("type") String type, @PathParam("name") String name) {
+		try {
+			AgentCenter agentCenter = nm.getThisNode();
+			if(type != null) {	
+				for(AgentType at : am.getAgentTypes()) {
+					if(type.equals(at.getName())) {
+						AID aid = new AID(name, agentCenter, at);
+						boolean added = false;
+						try {
+							added = am.startAgent(aid);
+						} catch (Exception e) {
+							return Response.status(400).entity(aid.getType() + " cannot be added.").build();
+						}
+						if(added) {
+							return Response.status(200).entity(aid).build();
+						}
+						return Response.status(400).entity("Agent " + name + " already exists.").build();
+						
+					}
+				}
 			}
+			return Response.status(400).entity("Check type and try again.").build();
+		}catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(400).entity("Failed to start agent").build();
 		}
-		
-		//proci kroz hostove i posalji ovog agenta
-	
-		AgentType agentType = acmb.getAgentsTypes().get(type);
-		AID aid = new AID(name, acmb.getslaveAgentCenter(), agentType);
-		Agent agent = new Agent(aid);
-		return agent;
 	}
+	
 	
 	
 	@DELETE
 	@Path("/running/{aid}")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response stopAgent(@PathParam("aid") String aid) {
-		if(acmb.getRunningAgents().get(aid) == null) {
-			return Response.status(400).entity("Not Found").build();
+		for(AID agent : am.getRunningAgents()) {
+			if(agent.getName().equals(aid)) {
+				am.stopAgent(agent);
+				return Response.status(200).entity(agent).build();
+			}
 		}
 		
-		Agent removed =  acmb.getRunningAgents().remove(aid);
-		//izbrisati ovog agenta iz ostalih hostova
+		return Response.status(400).entity("Unable to stop agent").build();
 		
-		return Response.status(200).entity(removed).build();
 	}
 	
 	
