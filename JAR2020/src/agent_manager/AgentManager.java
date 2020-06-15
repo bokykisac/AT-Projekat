@@ -18,6 +18,9 @@ import ws.WSEndPoint;
 
 @Singleton
 public class AgentManager {
+	
+	public static String LOOKUP = "java:app/JAR2020/AgentManager!agent_manager.AgentManager";
+	
 	private HashMap<AID, Agent> runningAgents;
 	private HashMap<AgentCenter, ArrayList<AgentType>> agentTypes;
 	
@@ -39,9 +42,13 @@ public class AgentManager {
 		
 		AgentType at1 = new AgentType("PingAgent", "agents");
 		AgentType at2 = new AgentType("PongAgent", "agents");
+		AgentType at3 = new AgentType("CNPContractorAgent", "agents");
+		AgentType at4 = new AgentType("CNPManagerAgent", "agents");
 		ArrayList<AgentType> tmp = new ArrayList<AgentType>();
 		tmp.add(at1);
 		tmp.add(at2);
+		tmp.add(at3);
+		tmp.add(at4);
 		agentTypes.put(center, tmp);
 
 	}
