@@ -42,9 +42,9 @@ public class MessageBean {
 	Queue queue;
 		
 	@GET
+	@Path("")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<String> getMessages() {
-		// vrati listu performativa
 		List<String> ret = new ArrayList<String>();
 		for(Enum<Performative> e : Performative.values()) {
 			ret.add(e.toString());
@@ -53,6 +53,7 @@ public class MessageBean {
 	}
 	
 	@POST
+	@Path("")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response sendMessage(ACLMessage msg) {
@@ -65,7 +66,6 @@ public class MessageBean {
 			return Response.status(200).entity("Poruka poslata").build();
 			
 		}catch (Exception e) {
-			System.out.println("USAO U EXCEPTION");
 			e.printStackTrace();
 		}
 		return Response.status(400).entity("Unable to send message").build();

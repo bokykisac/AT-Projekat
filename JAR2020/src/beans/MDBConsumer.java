@@ -9,6 +9,7 @@ import javax.jms.ObjectMessage;
 import agent_manager.AgentManager;
 import model.ACLMessage;
 import model.AID;
+import ws.WSEndPoint;
 
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.EJB;
@@ -20,12 +21,16 @@ public class MDBConsumer implements MessageListener{
 	
 	@EJB
 	AgentManager am;
+	
+	@EJB
+	WSEndPoint ws;
 
 	@Override
 	public void onMessage(Message message) {
 		try {
 			ACLMessage msg = (ACLMessage) ((ObjectMessage) message).getObject();
 			AID[] receivers = msg.getReceivers();
+			ws.echoTextMessage("New message in queue");
 			System.out.println("MESSAGE ON QUEUE! - " + message);
 			for (AID a : receivers) {
 				am.msgToAgent(a, msg);

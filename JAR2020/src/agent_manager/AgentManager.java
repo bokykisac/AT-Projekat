@@ -14,6 +14,7 @@ import model.AgentCenter;
 import model.AgentType;
 import node.NodeManager;
 import node.NodeManagerLocal;
+import ws.WSEndPoint;
 
 @Singleton
 public class AgentManager {
@@ -23,10 +24,14 @@ public class AgentManager {
 	@EJB
 	NodeManagerLocal nm;
 	
+	@EJB
+	WSEndPoint ws;
+	
 	
 	public void startInit(AgentCenter center) {
 		runningAgents = new HashMap<AID, Agent>();
 		initAgentTypes(center);
+		ws.echoTextMessage("Agent center initiated: " + center.getAlias());
 	}
 	
 	private void initAgentTypes(AgentCenter center) {
@@ -65,6 +70,8 @@ public class AgentManager {
 			if (obj instanceof Agent) {
 				((Agent) obj).setId(agent);
 				runningAgents.put(agent, (Agent) obj);
+				
+				ws.echoTextMessage("New agent started: " + agent.getName());
 				return true;
 			} else {
 				System.out.println("Type " + agent.getType() + " cannot be added!");
@@ -102,12 +109,14 @@ public class AgentManager {
 			if (agentTypes.get(center) != null) {
 				System.out.println("DODAJE TIP AGENTA U CENTAR");
 				agentTypes.get(center).add(at);
+				ws.echoTextMessage("Agent type added: " + at.getName());
 				
 			} else {
 				System.out.println("CENTAR JE BIO NULL");
 				ArrayList<AgentType> tmp = new ArrayList<AgentType>();
 				tmp.add(at);
 				agentTypes.put(center, tmp);
+				ws.echoTextMessage("Agent type added: " + at.getName());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -119,6 +128,7 @@ public class AgentManager {
 		AID a = containsAgent(agent);
 		if (a != null) {
 			runningAgents.remove(a);
+			ws.echoTextMessage("Agent stopped: " + agent.getName());
 		} else {
 			System.out.println("No such agent!");
 		}
@@ -126,7 +136,6 @@ public class AgentManager {
 	
 	public boolean msgToAgent(AID agent, ACLMessage msg) {
 		AID temp = containsAgent(agent);
-		System.out.println("Nasao je agenta, salje poruku");
 		Agent receiver = runningAgents.get(temp);
 		if (receiver != null) {
 			receiver.handleMessage(msg);
