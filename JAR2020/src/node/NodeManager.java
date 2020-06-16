@@ -7,7 +7,6 @@ import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.naming.NamingException;
 
 import agent_manager.AgentManager;
 import model.AgentCenter;
@@ -37,13 +36,13 @@ public class NodeManager implements NodeManagerLocal{
 		try {
 			am.startInit(getThisNode());
 			System.out.println("AGENT MANAGER INITIATED");
-			//HeartBeatLocal hbl = (HeartBeatLocal) context.lookup(HeartBeatLocal.LOOKUP);
+			//heartbeat
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-//		if (!masterNode.getAddress().equals(thisNode.getAddress())) {
-//			RestBuilder.contactMaster(masterNode, thisNode);
-//		}
+		if (!masterNode.getAddress().equals(thisNode.getAddress())) {
+			//contact nodes
+		}
 		
 	}
 	
@@ -60,14 +59,7 @@ public class NodeManager implements NodeManagerLocal{
 	
 	@Override
 	public AgentCenter getThisNode() {
-		System.out.println("GET THIS NODE");
-		System.out.println(this.thisNode);
 		return thisNode;
-	}
-	
-	@Override
-	public void testiram() {
-		System.out.println(thisNode);
 	}
 
 	
